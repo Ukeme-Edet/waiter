@@ -5,15 +5,6 @@ import (
 	"net"
 )
 
-type server interface {
-	Run(addr string) error
-	Listen(addr string) (net.Listener, error)
-	Accept(l net.Listener) (net.Conn, error)
-	Read(conn net.Conn, buf []byte) (string, error)
-	Write(conn net.Conn, data []byte) (int, error)
-	Close(conn net.Conn) error
-}
-
 type Server struct{}
 
 func (s *Server) Listen(addr string) (net.Listener, error) {
@@ -46,6 +37,13 @@ func (s *Server) Run(addr string, dir string) error {
 	if err != nil {
 		return fmt.Errorf("failed to bind to port %s: %w", addr, err)
 	}
+	defer func() {
+		if closeErr := l.Close(); closeErr != nil {
+			fmt.Printf("Error closing listener: %s\n", closeErr)
+		} else {
+			fmt.Println("Listener closed successfully")
+		}
+	}()
 	fmt.Println("Server is listening on", addr)
 
 	for {

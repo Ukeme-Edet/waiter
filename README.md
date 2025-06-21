@@ -94,4 +94,4 @@ make clean
 
 ## License
 
-[Insert your license information here]
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.

@@ -98,7 +98,8 @@ func handle_conn(s *Server, conn *net.Conn, dir string) {
 				response_body = "User-Agent header missing"
 			}
 		case "files":
-			if method == "GET" {
+			switch method {
+			case "GET":
 				file, err := os.ReadFile(dir + "/" + filepath.Clean(path_parts[2]))
 				if err != nil {
 					status_code = 404
@@ -111,7 +112,7 @@ func handle_conn(s *Server, conn *net.Conn, dir string) {
 					response_headers["Content-Type"] = "application/octet-stream"
 					response_body = string(file)
 				}
-			} else if method == "POST" {
+			case "POST":
 				file, err := os.OpenFile(dir+"/"+filepath.Clean(path_parts[2]), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 				if err != nil {
 					status_code = 500
