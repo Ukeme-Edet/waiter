@@ -113,7 +113,24 @@ func handle_conn(s *Server, conn *net.Conn, dir string) {
 					response_body = string(file)
 				}
 			case "POST":
-				file, err := os.OpenFile(dir+"/"+filepath.Clean(path_parts[2]), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+				cleanPath := filepath.Clean(filepath.Join(path_parts[2:]...))
+				fullPath := filepath.Join(dir, cleanPath)
+				rel, err := filepath.Rel(dir, fullPath)
+				if err != nil || strings.HasPrefix(rel, "..") {
+					status_code = 400
+					status_text = "Bad Request"
+					response_headers["Content-Type"] = "text/plain"
+					response_body = "400 Bad Request"
+					break
+				}
+				if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+					status_code = 500
+					status_text = "Internal Server Error"
+					response_headers["Content-Type"] = "text/plain"
+					response_body = "500 Internal Server Error"
+					break
+				}
+				file, err := os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 				if err != nil {
 					status_code = 500
 					status_text = "Internal Server Error"
